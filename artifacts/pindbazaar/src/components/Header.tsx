@@ -45,7 +45,7 @@ export const Header = () => {
           
           {/* Mobile Menu Toggle */}
           <button
-            className="lg:hidden p-2 -ml-2 text-foreground"
+            className="md:hidden p-2 -ml-2 text-foreground"
             onClick={() => setIsMobileMenuOpen(true)}
           >
             <Menu className="w-6 h-6" />
@@ -64,7 +64,7 @@ export const Header = () => {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+          <nav className="hidden md:flex items-center gap-6 absolute left-1/2 -translate-x-1/2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -141,14 +141,14 @@ export const Header = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 z-50 lg:hidden backdrop-blur-sm"
+              className="fixed inset-0 bg-black/50 z-50 md:hidden backdrop-blur-sm"
             />
             <motion.div
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-card z-50 lg:hidden flex flex-col shadow-2xl"
+              className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-card z-50 md:hidden flex flex-col shadow-2xl"
             >
               <div className="p-6 border-b flex items-center justify-between bg-primary/5">
                 <div className="flex items-center gap-2">

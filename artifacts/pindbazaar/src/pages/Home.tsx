@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHeroBanners, useCategories, useProducts, useReviews } from '@/hooks/use-queries';
+import { useHeroBanners, useCategories, useProducts } from '@/hooks/use-queries';
 import { ProductCard } from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
@@ -10,15 +10,15 @@ import useEmblaCarousel from 'embla-carousel-react';
 export default function Home() {
   const { data: banners, isLoading: loadingBanners } = useHeroBanners(true);
   const { data: categories } = useCategories();
-  const { data: featuredProducts, isLoading: loadingProducts } = useProducts({ isFeatured: true, limit: 8 });
-  const { data: reviews } = useReviews(true);
+  const { data: featuredProducts, isLoading: loadingProducts } = useProducts({ limit: 8 });
 
-  const [activeCategory, setActiveCategory] = React.useState<number | null>(null);
+  const [activeCategory, setActiveCategory] = React.useState<string | null>(null);
   
   // Custom filtered products since API query only supports one param easily right now,
   // and we want featured on home page but filterable by tabs.
-  const displayProducts = activeCategory 
-    ? featuredProducts?.filter(p => p.category_id === activeCategory || p.subcategory_id === activeCategory)
+  // Filter by category (UUIDs are strings — no parseInt)
+  const displayProducts = activeCategory
+    ? featuredProducts?.filter((p: any) => p.category_id === activeCategory)
     : featuredProducts;
 
   // Hero Carousel

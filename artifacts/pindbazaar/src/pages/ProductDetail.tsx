@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useRoute } from 'wouter';
-import { useProductBySlug, useProducts } from '@/hooks/use-queries';
+import { useProductById, useProducts } from '@/hooks/use-queries';
 import { formatPKR } from '@/utils/helpers';
 import { useCart } from '@/context/CartContext';
 import { ProductCard } from '@/components/ProductCard';
@@ -9,14 +9,15 @@ import { Minus, Plus, ShoppingBag, ShieldCheck, Truck, ChevronRight } from 'luci
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
+// Route is /products/:id — products are identified by UUID id (no slug column)
 export default function ProductDetail() {
-  const [match, params] = useRoute('/products/:slug');
-  const slug = params?.slug || '';
-  
-  const { data: product, isLoading, error } = useProductBySlug(slug);
-  const { data: relatedProducts } = useProducts({ 
+  const [match, params] = useRoute('/products/:id');
+  const id = params?.id || '';
+
+  const { data: product, isLoading, error } = useProductById(id);
+  const { data: relatedProducts } = useProducts({
     categoryId: product?.category_id,
-    limit: 4
+    limit: 5,
   });
 
   const { addToCart } = useCart();
@@ -26,16 +27,16 @@ export default function ProductDetail() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-12 animate-pulse flex flex-col md:flex-row gap-12">
-        <div className="w-full md:w-1/2 aspect-square bg-muted rounded-2xl"></div>
+        <div className="w-full md:w-1/2 aspect-square bg-muted rounded-2xl" />
         <div className="w-full md:w-1/2 space-y-6 pt-8">
-          <div className="h-10 bg-muted rounded w-3/4"></div>
-          <div className="h-6 bg-muted rounded w-1/4"></div>
+          <div className="h-10 bg-muted rounded w-3/4" />
+          <div className="h-6 bg-muted rounded w-1/4" />
           <div className="space-y-2 pt-6">
-            <div className="h-4 bg-muted rounded w-full"></div>
-            <div className="h-4 bg-muted rounded w-full"></div>
-            <div className="h-4 bg-muted rounded w-5/6"></div>
+            <div className="h-4 bg-muted rounded w-full" />
+            <div className="h-4 bg-muted rounded w-full" />
+            <div className="h-4 bg-muted rounded w-5/6" />
           </div>
-          <div className="h-16 bg-muted rounded w-full mt-8"></div>
+          <div className="h-16 bg-muted rounded w-full mt-8" />
         </div>
       </div>
     );
@@ -45,13 +46,13 @@ export default function ProductDetail() {
     return (
       <div className="container mx-auto px-4 py-24 text-center">
         <h1 className="text-3xl font-serif font-bold text-foreground mb-4">Product Not Found</h1>
-        <p className="text-muted-foreground mb-8">The product you are looking for does not exist or has been removed.</p>
+        <p className="text-muted-foreground mb-8">This product does not exist or has been removed.</p>
         <Button onClick={() => window.history.back()}>Go Back</Button>
       </div>
     );
   }
 
-  const images = product.images && product.images.length > 0 ? product.images : [];
+  const images: string[] = product.images && product.images.length > 0 ? product.images : [];
   const mainImage = images[activeImageIndex];
 
   const handleAddToCart = () => {
@@ -59,18 +60,18 @@ export default function ProductDetail() {
       product_id: product.id,
       name: product.name,
       price: product.price,
-      quantity: quantity,
+      quantity,
       image: images[0] || '',
     });
     toast.success(`${quantity} ${quantity > 1 ? 'items' : 'item'} added to cart`);
   };
 
-  const filteredRelated = relatedProducts?.filter((p: any) => p.id !== product.id).slice(0, 4) || [];
+  const filteredRelated = (relatedProducts || []).filter((p: any) => p.id !== product.id).slice(0, 4);
 
   return (
     <div className="flex-1 bg-background w-full py-8 md:py-12">
       <div className="container mx-auto px-4 lg:px-8">
-        
+
         {/* Breadcrumbs */}
         <nav className="flex items-center text-sm text-muted-foreground mb-8">
           <a href="/" className="hover:text-primary transition-colors">Home</a>
@@ -81,8 +82,8 @@ export default function ProductDetail() {
         </nav>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 mb-20">
-          
-          {/* Images Gallery */}
+
+          {/* Image Gallery */}
           <div className="space-y-4">
             <div className="aspect-square bg-muted rounded-2xl overflow-hidden relative border">
               {mainImage ? (
@@ -103,21 +104,18 @@ export default function ProductDetail() {
                   No image available
                 </div>
               )}
-              {product.compare_price && product.compare_price > product.price && (
-                <div className="absolute top-4 left-4 bg-accent text-accent-foreground text-sm font-bold px-3 py-1 rounded-full shadow-md">
-                  Save {Math.round(((product.compare_price - product.price) / product.compare_price) * 100)}%
-                </div>
-              )}
             </div>
-            
+
             {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-4 gap-3">
                 {images.map((img: string, idx: number) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
                     className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-                      activeImageIndex === idx ? 'border-primary ring-2 ring-primary/20' : 'border-transparent opacity-70 hover:opacity-100'
+                      activeImageIndex === idx
+                        ? 'border-primary ring-2 ring-primary/20'
+                        : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
                     <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
@@ -129,19 +127,19 @@ export default function ProductDetail() {
 
           {/* Product Info */}
           <div className="flex flex-col">
+            {(product as any).categories?.name && (
+              <p className="text-sm text-accent font-semibold uppercase tracking-wider mb-3">
+                {(product as any).categories.name}
+              </p>
+            )}
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-foreground mb-4 leading-tight">
               {product.name}
             </h1>
-            
+
             <div className="flex items-center gap-4 mb-6">
               <span className="text-3xl font-bold text-primary">
                 {formatPKR(product.price)}
               </span>
-              {product.compare_price && (
-                <span className="text-xl text-muted-foreground line-through">
-                  {formatPKR(product.compare_price)}
-                </span>
-              )}
             </div>
 
             <div className="prose prose-sm sm:prose-base text-muted-foreground mb-8">
@@ -156,36 +154,30 @@ export default function ProductDetail() {
               <div className="flex items-center gap-4">
                 <span className="font-medium text-foreground min-w-[80px]">Quantity</span>
                 <div className="flex items-center bg-muted rounded-full p-1 border">
-                  <button 
+                  <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-background shadow-sm transition-colors"
                   >
                     <Minus className="w-4 h-4" />
                   </button>
                   <span className="w-12 text-center font-medium">{quantity}</span>
-                  <button 
+                  <button
                     onClick={() => setQuantity(quantity + 1)}
                     className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-background shadow-sm transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                <span className="text-sm text-muted-foreground ml-2">
-                  {product.stock ? `${product.stock} available` : 'Out of stock'}
-                </span>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  className="flex-1 text-base h-14 bg-primary hover:bg-primary/90"
-                  onClick={handleAddToCart}
-                  disabled={!product.stock}
-                >
-                  <ShoppingBag className="w-5 h-5 mr-2" />
-                  {product.stock ? 'Add to Cart' : 'Out of Stock'}
-                </Button>
-              </div>
+              <Button
+                size="lg"
+                className="w-full text-base h-14 bg-primary hover:bg-primary/90"
+                onClick={handleAddToCart}
+              >
+                <ShoppingBag className="w-5 h-5 mr-2" />
+                Add to Cart
+              </Button>
             </div>
 
             {/* Guarantees */}
@@ -205,7 +197,6 @@ export default function ProductDetail() {
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 

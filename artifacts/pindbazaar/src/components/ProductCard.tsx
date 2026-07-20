@@ -27,10 +27,11 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     toast.success(`${product.name} added to cart`);
   };
 
+  // Products are linked by UUID id — no slug column exists
   return (
-    <Link href={`/products/${product.slug}`} className="group block h-full">
+    <Link href={`/products/${product.id}`} className="group block h-full">
       <motion.div
-        whileHover={{ y: -5 }}
+        whileHover={{ y: -4 }}
         className="h-full bg-card rounded-xl border overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300"
       >
         <div className="aspect-square relative overflow-hidden bg-muted">
@@ -41,48 +42,28 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-secondary">
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-secondary/50 text-sm">
               No image
             </div>
           )}
-          {product.compare_price && product.compare_price > product.price && (
-            <div className="absolute top-3 left-3 bg-accent text-accent-foreground text-xs font-bold px-2 py-1 rounded-full">
-              Save {Math.round(((product.compare_price - product.price) / product.compare_price) * 100)}%
-            </div>
-          )}
-          {!product.stock && (
-            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center">
-              <span className="bg-background text-foreground font-semibold px-4 py-2 rounded shadow">
-                Out of Stock
-              </span>
-            </div>
-          )}
         </div>
-        
+
         <div className="p-4 sm:p-5 flex flex-col flex-1">
-          <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">
-            {product.category?.name || 'Authentic'}
+          <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-medium">
+            {product.categories?.name || 'Authentic Village Goods'}
           </div>
-          <h3 className="font-serif font-semibold text-lg leading-tight mb-2 group-hover:text-primary transition-colors">
+          <h3 className="font-serif font-semibold text-lg leading-tight mb-2 group-hover:text-primary transition-colors line-clamp-2">
             {product.name}
           </h3>
-          
+
           <div className="mt-auto pt-4 flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="font-bold text-primary text-lg">
-                {formatPKR(product.price)}
-              </span>
-              {product.compare_price && (
-                <span className="text-sm text-muted-foreground line-through">
-                  {formatPKR(product.compare_price)}
-                </span>
-              )}
-            </div>
-            
+            <span className="font-bold text-primary text-lg">
+              {formatPKR(product.price)}
+            </span>
+
             <button
               onClick={handleAddToCart}
-              disabled={!product.stock}
-              className="w-10 h-10 rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed group/btn"
+              className="w-10 h-10 rounded-full bg-secondary hover:bg-primary hover:text-primary-foreground flex items-center justify-center transition-colors group/btn"
               aria-label="Add to cart"
             >
               <ShoppingCart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />

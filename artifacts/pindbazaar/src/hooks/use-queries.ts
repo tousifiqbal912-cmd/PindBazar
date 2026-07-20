@@ -1,121 +1,119 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/utils/supabase';
 
-// Helper to handle simple select queries
-const fetchSelect = async (table: string, options: any = {}) => {
-  let query = supabase.from(table).select(options.select || '*');
-  if (options.eq) {
-    for (const [key, value] of Object.entries(options.eq)) {
-      query = query.eq(key, value);
-    }
-  }
-  if (options.order) {
-    query = query.order(options.order.column, { ascending: options.order.ascending });
-  }
-  if (options.limit) {
-    query = query.limit(options.limit);
-  }
-  const { data, error } = await query;
-  if (error) throw error;
-  return data;
-};
-
+// ── Site Settings ────────────────────────────────────────────────────────────
+// Table: site_settings — single row (id=1) with named columns
 export const useSiteSettings = () => {
   return useQuery({
     queryKey: ['siteSettings'],
     queryFn: async () => {
-      const data = await fetchSelect('site_settings');
-      const settings = data?.reduce((acc: any, curr: any) => {
-        acc[curr.key] = curr.value;
-        return acc;
-      }, {});
-      return settings || {};
+      const { data, error } = await supabase.from('site_settings').select('*').eq('id', 1).single();
+      if (error) return {};
+      return data || {};
     },
+    retry: false,
   });
 };
 
-export const useHeroBanners = (activeOnly = true) => {
+export const useUpdateSiteSettings = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: any) => {
+      const { error } = await supabase.from('site_settings').update(payload).eq('id', 1);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['siteSettings'] }),
+  });
+};
+
+// ── Hero Banners ─────────────────────────────────────────────────────────────
+// Table: hero_banners — id (UUID), title, subtitle, image_url, created_at
+export const useHeroBanners = () => {
   return useQuery({
-    queryKey: ['heroBanners', activeOnly],
+    queryKey: ['heroBanners'],
     queryFn: async () => {
-      let query = supabase.from('hero_banners').select('*');
-      if (activeOnly) query = query.eq('is_active', true);
-      const { data, error } = await query;
-      if (error) return [];   // table may not exist yet — show default hero
+      const { data, error } = await supabase.from('hero_banners').select('*').order('created_at', { ascending: true });
+      if (error) return [];
       return data ?? [];
     },
     retry: false,
   });
 };
 
+// ── Categories ───────────────────────────────────────────────────────────────
+// Table: categories — id (UUID), name, created_at
 export const useCategories = () => {
   return useQuery({
     queryKey: ['categories'],
-    queryFn: () => fetchSelect('categories', { order: { column: 'name', ascending: true } }),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('categories').select('*').order('name', { ascending: true });
+      if (error) return [];
+      return data ?? [];
+    },
+    retry: false,
   });
 };
 
-export const useSubcategories = (categoryId?: number) => {
+// ── Subcategories ─────────────────────────────────────────────────────────────
+// Table: subcategories — id (UUID), category_id (UUID), name, created_at
+export const useSubcategories = (categoryId?: string) => {
   return useQuery({
     queryKey: ['subcategories', categoryId],
     queryFn: async () => {
       let query = supabase.from('subcategories').select('*').order('name', { ascending: true });
       if (categoryId) query = query.eq('category_id', categoryId);
       const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      if (error) return [];
+      return data ?? [];
     },
-    enabled: true,
+    retry: false,
   });
 };
 
-export const useProducts = (options?: { isFeatured?: boolean; activeOnly?: boolean; categoryId?: number; limit?: number }) => {
+// ── Products ─────────────────────────────────────────────────────────────────
+// Table: products — id (UUID), name, description, price, category_id (UUID),
+//                   subcategory_id (UUID), images (TEXT[]), created_at
+export const useProducts = (options?: { categoryId?: string; limit?: number }) => {
   return useQuery({
     queryKey: ['products', options],
     queryFn: async () => {
-      let query = supabase.from('products').select('*').order('created_at', { ascending: false });
-      if (options?.isFeatured) query = query.eq('is_featured', true);
-      if (options?.activeOnly !== false) query = query.eq('is_active', true);
-      if (options?.categoryId) {
-        query = query.or(`category_id.eq.${options.categoryId},subcategory_id.eq.${options.categoryId}`);
-      }
+      let query = supabase.from('products').select('*, categories(name)').order('created_at', { ascending: false });
+      if (options?.categoryId) query = query.eq('category_id', options.categoryId);
       if (options?.limit) query = query.limit(options.limit);
       const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      if (error) return [];
+      return data ?? [];
     },
+    retry: false,
   });
 };
 
-export const useProductBySlug = (slug: string) => {
+// Fetch a single product by id
+export const useProductById = (id: string) => {
   return useQuery({
-    queryKey: ['product', slug],
+    queryKey: ['product', id],
     queryFn: async () => {
-      const { data, error } = await supabase.from('products').select('*').eq('slug', slug).single();
+      const { data, error } = await supabase.from('products').select('*, categories(name), subcategories(name)').eq('id', id).single();
       if (error) throw error;
       return data;
     },
-    enabled: !!slug,
+    enabled: !!id,
+    retry: false,
   });
 };
 
-export const useReviews = (approvedOnly = true) => {
-  return useQuery({
-    queryKey: ['reviews', approvedOnly],
-    queryFn: async () => {
-      let query = supabase.from('reviews').select('*').order('created_at', { ascending: false });
-      if (approvedOnly) query = query.eq('is_approved', true);
-      const { data, error } = await query;
-      if (error) throw error;
-      return data;
-    },
-  });
-};
-
+// ── Orders ────────────────────────────────────────────────────────────────────
+// Table: orders — id, customer_name, customer_phone, customer_address, items (JSONB),
+//                 total_price, status, created_at
 export const useOrders = () => {
   return useQuery({
     queryKey: ['orders'],
-    queryFn: () => fetchSelect('orders', { order: { column: 'created_at', ascending: false } }),
+    queryFn: async () => {
+      const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (error) return [];
+      return data ?? [];
+    },
+    retry: false,
   });
 };
 

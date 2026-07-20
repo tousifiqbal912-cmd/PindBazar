@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useLocation } from 'wouter';
 import { useProducts, useCategories } from '@/hooks/use-queries';
 import { ProductCard } from '@/components/ProductCard';
 import { Search, SlidersHorizontal, Leaf } from 'lucide-react';
@@ -7,63 +6,59 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Products() {
-  const [location] = useLocation();
   const searchParams = new URLSearchParams(window.location.search);
   const initialQuery = searchParams.get('q') || '';
 
   const { data: categories } = useCategories();
-  const { data: allProducts, isLoading } = useProducts({ activeOnly: true });
+  const { data: allProducts, isLoading } = useProducts();
 
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('newest');
 
   // Filter and sort client-side
-  let filteredProducts = allProducts || [];
+  let filteredProducts = (allProducts || []) as any[];
 
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    filteredProducts = filteredProducts.filter(p => 
-      p.name.toLowerCase().includes(q) || 
+    filteredProducts = filteredProducts.filter((p: any) =>
+      p.name.toLowerCase().includes(q) ||
       (p.description && p.description.toLowerCase().includes(q))
     );
   }
 
   if (selectedCategory !== 'all') {
-    const catId = parseInt(selectedCategory);
-    filteredProducts = filteredProducts.filter(p => 
-      p.category_id === catId || p.subcategory_id === catId
-    );
+    // category_id is a UUID string — no parseInt needed
+    filteredProducts = filteredProducts.filter((p: any) => p.category_id === selectedCategory);
   }
 
   if (sortBy === 'price_asc') {
-    filteredProducts.sort((a, b) => a.price - b.price);
+    filteredProducts = [...filteredProducts].sort((a, b) => a.price - b.price);
   } else if (sortBy === 'price_desc') {
-    filteredProducts.sort((a, b) => b.price - a.price);
-  } else if (sortBy === 'newest') {
-    filteredProducts.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    filteredProducts = [...filteredProducts].sort((a, b) => b.price - a.price);
+  } else {
+    filteredProducts = [...filteredProducts].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   }
-
-  const mainCategories = categories?.filter((c: any) => !c.parent_id) || [];
 
   return (
     <div className="flex-1 bg-background w-full py-8 md:py-12">
       <div className="container mx-auto px-4 lg:px-8">
-        
+
         <div className="mb-8 md:mb-12">
           <h1 className="text-3xl md:text-5xl font-serif font-bold text-foreground mb-4">Our Products</h1>
           <p className="text-muted-foreground text-lg max-w-2xl">
-            Explore our curated selection of pure, authentic village goods. Every product is a testament to natural farming and honest processing.
+            Explore our curated selection of pure, authentic village goods.
           </p>
         </div>
 
         {/* Filters Toolbar */}
         <div className="bg-card border rounded-2xl p-4 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
-          
           <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search products..." 
+            <Input
+              placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 w-full bg-muted/50 border-transparent focus-visible:ring-primary"
@@ -79,8 +74,8 @@ export default function Products() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Categories</SelectItem>
-                  {mainCategories.map((cat: any) => (
-                    <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                  {(categories || []).map((cat: any) => (
+                    <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -103,7 +98,7 @@ export default function Products() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
-              <div key={n} className="h-[400px] bg-muted animate-pulse rounded-xl" />
+              <div key={n} className="h-[380px] bg-muted animate-pulse rounded-xl" />
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (
@@ -117,9 +112,9 @@ export default function Products() {
             <Leaf className="w-16 h-16 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="text-xl font-serif font-semibold mb-2">No products found</h3>
             <p className="text-muted-foreground max-w-md mx-auto">
-              We couldn't find any products matching your current filters. Try adjusting your search or category selection.
+              Try adjusting your search or category filter.
             </p>
-            <button 
+            <button
               onClick={() => { setSearchQuery(''); setSelectedCategory('all'); }}
               className="mt-6 text-primary font-medium hover:underline"
             >

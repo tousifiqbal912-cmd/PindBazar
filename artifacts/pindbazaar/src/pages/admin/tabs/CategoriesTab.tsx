@@ -8,42 +8,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Edit, Trash2, Loader2, ArrowRight, FolderOpen, Folder } from 'lucide-react';
-import { generateSlug } from '@/utils/helpers';
 import { toast } from 'sonner';
 
 // ── Main Categories ─────────────────────────────────────────────────────────
+// Table: categories — id (UUID), name, created_at  (no slug column)
 
 function MainCategoriesPanel() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ['admin_categories'],
     queryFn: async () => {
       const { data, error } = await supabase.from('categories').select('*').order('name', { ascending: true });
       if (error) throw error;
-      return data;
+      return data ?? [];
     }
   });
 
-  const handleNameChange = (val: string) => {
-    setName(val);
-    if (!editingId) setSlug(generateSlug(val));
-  };
-
-  const resetForm = () => { setEditingId(null); setName(''); setSlug(''); };
+  const resetForm = () => { setEditingId(null); setName(''); };
 
   const openEdit = (cat: any) => {
-    setEditingId(cat.id); setName(cat.name); setSlug(cat.slug);
+    setEditingId(cat.id); setName(cat.name);
     setIsDialogOpen(true);
   };
 
   const save = useMutation({
     mutationFn: async () => {
-      const payload = { name, slug };
+      const payload = { name };
       if (editingId) {
         const { error } = await supabase.from('categories').update(payload).eq('id', editingId);
         if (error) throw error;
@@ -62,7 +56,7 @@ function MainCategoriesPanel() {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase.from('categories').delete().eq('id', id);
       if (error) throw error;
     },
@@ -72,7 +66,7 @@ function MainCategoriesPanel() {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
     onError: (e: any) => {
-      if (e.code === '23503') toast.error('Cannot delete: category is in use by products.');
+      if (e.code === '23503') toast.error('Cannot delete: category has products linked to it.');
       else toast.error(e.message || 'Error deleting category');
     }
   });
@@ -93,11 +87,7 @@ function MainCategoriesPanel() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Category Name</Label>
-                <Input value={name} onChange={e => handleNameChange(e.target.value)} placeholder="e.g. Natural Oils" />
-              </div>
-              <div className="space-y-2">
-                <Label>Slug</Label>
-                <Input value={slug} onChange={e => setSlug(e.target.value)} placeholder="natural-oils" />
+                <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Natural Oils" autoFocus />
               </div>
             </div>
             <div className="flex justify-end gap-2 border-t pt-4">
@@ -116,17 +106,15 @@ function MainCategoriesPanel() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Slug</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={3} className="text-center py-6"><Loader2 className="w-5 h-5 animate-spin mx-auto text-primary" /></TableCell></TableRow>
-            ) : categories && categories.length > 0 ? categories.map(cat => (
+              <TableRow><TableCell colSpan={2} className="text-center py-6"><Loader2 className="w-5 h-5 animate-spin mx-auto text-primary" /></TableCell></TableRow>
+            ) : categories && categories.length > 0 ? categories.map((cat: any) => (
               <TableRow key={cat.id}>
                 <TableCell className="font-medium text-primary">{cat.name}</TableCell>
-                <TableCell className="text-muted-foreground font-mono text-xs">{cat.slug}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(cat)}><Edit className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="icon" className="text-destructive" onClick={() => {
@@ -135,7 +123,7 @@ function MainCategoriesPanel() {
                 </TableCell>
               </TableRow>
             )) : (
-              <TableRow><TableCell colSpan={3} className="text-center py-6 text-muted-foreground">No categories yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={2} className="text-center py-6 text-muted-foreground">No categories yet. Add one above.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
@@ -145,13 +133,13 @@ function MainCategoriesPanel() {
 }
 
 // ── Subcategories ────────────────────────────────────────────────────────────
+// Table: subcategories — id (UUID), category_id (UUID), name, created_at  (no slug)
 
 function SubcategoriesPanel() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
   const [categoryId, setCategoryId] = useState<string>('');
 
   const { data: categories } = useQuery({
@@ -159,7 +147,7 @@ function SubcategoriesPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.from('categories').select('*').order('name', { ascending: true });
       if (error) throw error;
-      return data;
+      return data ?? [];
     }
   });
 
@@ -168,27 +156,22 @@ function SubcategoriesPanel() {
     queryFn: async () => {
       const { data, error } = await supabase.from('subcategories').select('*, categories(name)').order('name', { ascending: true });
       if (error) throw error;
-      return data;
+      return data ?? [];
     }
   });
 
-  const handleNameChange = (val: string) => {
-    setName(val);
-    if (!editingId) setSlug(generateSlug(val));
-  };
-
-  const resetForm = () => { setEditingId(null); setName(''); setSlug(''); setCategoryId(''); };
+  const resetForm = () => { setEditingId(null); setName(''); setCategoryId(''); };
 
   const openEdit = (sub: any) => {
-    setEditingId(sub.id); setName(sub.name); setSlug(sub.slug);
-    setCategoryId(sub.category_id?.toString() || '');
+    setEditingId(sub.id); setName(sub.name);
+    setCategoryId(sub.category_id || '');
     setIsDialogOpen(true);
   };
 
   const save = useMutation({
     mutationFn: async () => {
       if (!categoryId) throw new Error('Please select a parent category');
-      const payload = { name, slug, category_id: parseInt(categoryId) };
+      const payload = { name, category_id: categoryId };
       if (editingId) {
         const { error } = await supabase.from('subcategories').update(payload).eq('id', editingId);
         if (error) throw error;
@@ -207,13 +190,14 @@ function SubcategoriesPanel() {
   });
 
   const remove = useMutation({
-    mutationFn: async (id: number) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase.from('subcategories').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success('Subcategory deleted');
       queryClient.invalidateQueries({ queryKey: ['admin_subcategories'] });
+      queryClient.invalidateQueries({ queryKey: ['subcategories'] });
     },
     onError: (e: any) => toast.error(e.message || 'Error deleting subcategory')
   });
@@ -233,28 +217,31 @@ function SubcategoriesPanel() {
             <DialogHeader><DialogTitle>{editingId ? 'Edit Subcategory' : 'Add Subcategory'}</DialogTitle></DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>Subcategory Name</Label>
-                <Input value={name} onChange={e => handleNameChange(e.target.value)} placeholder="e.g. Cold-Pressed Oils" />
-              </div>
-              <div className="space-y-2">
-                <Label>Slug</Label>
-                <Input value={slug} onChange={e => setSlug(e.target.value)} placeholder="cold-pressed-oils" />
-              </div>
-              <div className="space-y-2">
                 <Label>Parent Category</Label>
                 <Select value={categoryId} onValueChange={setCategoryId}>
                   <SelectTrigger><SelectValue placeholder="Select parent category" /></SelectTrigger>
                   <SelectContent>
-                    {categories?.map((c: any) => (
-                      <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
-                    ))}
+                    {categories && categories.length > 0 ? (
+                      categories.map((c: any) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="__none__" disabled>No categories yet — add one first</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
+                {(!categories || categories.length === 0) && (
+                  <p className="text-xs text-destructive">You need to create at least one main category first.</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Subcategory Name</Label>
+                <Input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Cold-Pressed Oils" autoFocus />
               </div>
             </div>
             <div className="flex justify-end gap-2 border-t pt-4">
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-              <Button onClick={() => save.mutate()} disabled={save.isPending || !name.trim() || !categoryId}>
+              <Button onClick={() => save.mutate()} disabled={save.isPending || !name.trim() || !categoryId || categoryId === '__none__'}>
                 {save.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 {editingId ? 'Save Changes' : 'Create Subcategory'}
               </Button>
@@ -269,13 +256,12 @@ function SubcategoriesPanel() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Parent Category</TableHead>
-              <TableHead>Slug</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-6"><Loader2 className="w-5 h-5 animate-spin mx-auto text-primary" /></TableCell></TableRow>
+              <TableRow><TableCell colSpan={3} className="text-center py-6"><Loader2 className="w-5 h-5 animate-spin mx-auto text-primary" /></TableCell></TableRow>
             ) : subcategories && subcategories.length > 0 ? subcategories.map((sub: any) => (
               <TableRow key={sub.id}>
                 <TableCell>
@@ -284,7 +270,6 @@ function SubcategoriesPanel() {
                   </div>
                 </TableCell>
                 <TableCell className="text-primary font-medium text-sm">{sub.categories?.name || '—'}</TableCell>
-                <TableCell className="text-muted-foreground font-mono text-xs">{sub.slug}</TableCell>
                 <TableCell className="text-right">
                   <Button variant="ghost" size="icon" onClick={() => openEdit(sub)}><Edit className="w-4 h-4" /></Button>
                   <Button variant="ghost" size="icon" className="text-destructive" onClick={() => {
@@ -293,7 +278,7 @@ function SubcategoriesPanel() {
                 </TableCell>
               </TableRow>
             )) : (
-              <TableRow><TableCell colSpan={4} className="text-center py-6 text-muted-foreground">No subcategories yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={3} className="text-center py-6 text-muted-foreground">No subcategories yet.</TableCell></TableRow>
             )}
           </TableBody>
         </Table>
