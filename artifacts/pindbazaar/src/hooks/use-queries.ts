@@ -38,12 +38,13 @@ export const useHeroBanners = (activeOnly = true) => {
   return useQuery({
     queryKey: ['heroBanners', activeOnly],
     queryFn: async () => {
-      let query = supabase.from('hero_banners').select('*').order('display_order', { ascending: true });
+      let query = supabase.from('hero_banners').select('*');
       if (activeOnly) query = query.eq('is_active', true);
       const { data, error } = await query;
-      if (error) throw error;
-      return data;
+      if (error) return [];   // table may not exist yet — show default hero
+      return data ?? [];
     },
+    retry: false,
   });
 };
 
@@ -51,6 +52,20 @@ export const useCategories = () => {
   return useQuery({
     queryKey: ['categories'],
     queryFn: () => fetchSelect('categories', { order: { column: 'name', ascending: true } }),
+  });
+};
+
+export const useSubcategories = (categoryId?: number) => {
+  return useQuery({
+    queryKey: ['subcategories', categoryId],
+    queryFn: async () => {
+      let query = supabase.from('subcategories').select('*').order('name', { ascending: true });
+      if (categoryId) query = query.eq('category_id', categoryId);
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: true,
   });
 };
 

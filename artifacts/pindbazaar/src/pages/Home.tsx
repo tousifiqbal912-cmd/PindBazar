@@ -100,13 +100,53 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="w-full h-full bg-primary/5 flex items-center justify-center text-center px-4">
-            <div>
-              <h1 className="text-4xl font-serif font-bold text-primary mb-4">Pure Village Authenticity</h1>
-              <p className="text-muted-foreground mb-6">Visit /admin to upload your hero banners.</p>
-              <Link href="/products" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8">
-                View Products
-              </Link>
+          <div className="w-full h-full relative overflow-hidden">
+            {/* Rich gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0a3d24] via-[#0F5132] to-[#1a6b40]" />
+            {/* Decorative texture overlay */}
+            <div className="absolute inset-0 opacity-10"
+              style={{backgroundImage: 'radial-gradient(circle at 20% 80%, #D97706 0%, transparent 50%), radial-gradient(circle at 80% 20%, #D97706 0%, transparent 50%)'}}
+            />
+            {/* Wheat/grain pattern lines */}
+            <div className="absolute inset-0 opacity-5"
+              style={{backgroundImage: 'repeating-linear-gradient(45deg, #fff 0, #fff 1px, transparent 0, transparent 50%)', backgroundSize: '20px 20px'}}
+            />
+            {/* Content */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center text-white px-6 max-w-3xl mx-auto">
+                <div className="flex justify-center mb-6">
+                  <img src="/logo.png" alt="PindBazaar" className="w-20 h-20 object-contain drop-shadow-lg" />
+                </div>
+                <motion.h1
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="text-4xl md:text-5xl lg:text-6xl font-serif font-bold mb-4 leading-tight"
+                >
+                  Pure from the Village,<br />
+                  <span className="text-[#D97706]">Delivered to Your Door</span>
+                </motion.h1>
+                <motion.p
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="text-lg md:text-xl text-white/85 mb-8 max-w-xl mx-auto"
+                >
+                  Authentic Desi Ghee, Natural Honey, Fresh Khajur and Cold-Pressed Oils — sourced directly from Pakistani villages.
+                </motion.p>
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex flex-wrap gap-4 justify-center"
+                >
+                  <Link href="/products" className="inline-flex items-center justify-center rounded-lg font-semibold transition-all bg-[#D97706] text-white hover:bg-[#b86206] h-12 px-8 shadow-lg">
+                    Shop Now
+                  </Link>
+                  <Link href="/about" className="inline-flex items-center justify-center rounded-lg font-semibold transition-all bg-white/15 backdrop-blur text-white border border-white/30 hover:bg-white/25 h-12 px-8">
+                    Our Story
+                  </Link>
+                </motion.div>
+              </div>
             </div>
           </div>
         )}
@@ -148,7 +188,7 @@ export default function Home() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-20 bg-background">
+      <section id="featured" className="py-20 bg-background">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-4">Our Premium Selection</h2>
@@ -168,7 +208,7 @@ export default function Home() {
               >
                 All Featured
               </button>
-              {categories.filter((c:any) => !c.parent_id).map((category: any) => (
+              {categories.map((category: any) => (
                 <button
                   key={category.id}
                   onClick={() => setActiveCategory(category.id)}

@@ -26,9 +26,10 @@ export const Header = () => {
 
   const navLinks = [
     { label: 'Home', href: '/' },
-    { label: 'All Products', href: '/products' },
+    { label: 'Products', href: '/products' },
+    { label: 'Featured', href: '/#featured' },
     { label: 'About Us', href: '/about' },
-    { label: 'Contact Us', href: '/contact' },
+    { label: 'Contact', href: '/contact' },
   ];
 
   return (
@@ -51,10 +52,12 @@ export const Header = () => {
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 z-10 shrink-0">
-            <div className="w-10 h-10 bg-primary text-primary-foreground rounded-lg flex items-center justify-center font-serif font-bold text-xl shadow-inner">
-              PB
-            </div>
+          <Link href="/" className="flex items-center gap-2.5 z-10 shrink-0">
+            <img
+              src="/logo.png"
+              alt="PindBazaar"
+              className="w-11 h-11 object-contain"
+            />
             <span className="font-serif font-bold text-2xl hidden sm:block tracking-tight text-primary">
               Pind<span className="text-accent">Bazaar</span>
             </span>
@@ -148,9 +151,12 @@ export const Header = () => {
               className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-card z-50 lg:hidden flex flex-col shadow-2xl"
             >
               <div className="p-6 border-b flex items-center justify-between bg-primary/5">
-                <span className="font-serif font-bold text-2xl text-primary">
-                  Pind<span className="text-accent">Bazaar</span>
-                </span>
+                <div className="flex items-center gap-2">
+                  <img src="/logo.png" alt="PindBazaar" className="w-9 h-9 object-contain" />
+                  <span className="font-serif font-bold text-2xl text-primary">
+                    Pind<span className="text-accent">Bazaar</span>
+                  </span>
+                </div>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="p-2 hover:bg-muted rounded-full"

@@ -66,66 +66,67 @@
   --elevate-1: rgba(0, 0, 0, 0.03);
   --elevate-2: rgba(0, 0, 0, 0.08);
 
-  /* Deep Emerald Green: #0F5132 */
-  /* Rich Warm Amber/Gold: #D97706 */
-  /* Warm Cream/Beige background: #FDFBF7 */
-  /* Dark Slate text: #1F2937 */
+  /* PindBazaar Premium Theme */
+  /* Deep Emerald Green: #0F5132  → hsl(150 70% 19%) */
+  /* Rich Warm Amber/Gold: #D97706 → hsl(32 96% 44%)  */
+  /* Warm Cream/Beige: #FDFBF7    → hsl(42 60% 98%)  */
+  /* Dark Slate: #1F2937           → hsl(215 28% 17%) */
 
-  --background: 40 50% 98%;
-  --foreground: 215 28% 17%;
+  --background: 42 60% 98%;        /* warm cream #FDFBF7 */
+  --foreground: 215 28% 15%;       /* rich dark slate */
 
-  --border: 40 20% 90%;
+  --border: 38 30% 88%;            /* warm tan border */
 
   --card: 0 0% 100%;
-  --card-foreground: 215 28% 17%;
-  --card-border: 40 20% 90%;
+  --card-foreground: 215 28% 15%;
+  --card-border: 38 30% 88%;
 
-  --sidebar: 40 50% 98%;
-  --sidebar-foreground: 215 28% 17%;
-  --sidebar-border: 40 20% 90%;
-  --sidebar-primary: 152 69% 19%;
-  --sidebar-primary-foreground: 40 50% 98%;
-  --sidebar-accent: 40 20% 90%;
-  --sidebar-accent-foreground: 215 28% 17%;
-  --sidebar-ring: 152 69% 19%;
+  --sidebar: 150 40% 11%;          /* deep forest sidebar */
+  --sidebar-foreground: 42 60% 95%;
+  --sidebar-border: 150 40% 16%;
+  --sidebar-primary: 32 96% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 150 40% 16%;
+  --sidebar-accent-foreground: 42 60% 95%;
+  --sidebar-ring: 32 96% 48%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 215 28% 17%;
-  --popover-border: 40 20% 90%;
+  --popover-foreground: 215 28% 15%;
+  --popover-border: 38 30% 88%;
 
-  --primary: 152 69% 19%;
-  --primary-foreground: 0 0% 100%;
+  --primary: 150 70% 19%;          /* deep emerald #0F5132 */
+  --primary-foreground: 42 60% 97%;
 
-  --secondary: 40 20% 90%;
-  --secondary-foreground: 215 28% 17%;
+  --secondary: 38 40% 93%;         /* warm sand */
+  --secondary-foreground: 215 28% 20%;
 
-  --muted: 40 20% 90%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 38 35% 91%;
+  --muted-foreground: 215 18% 46%;
 
-  --accent: 32 94% 44%;
+  --accent: 32 96% 44%;            /* rich amber #D97706 */
   --accent-foreground: 0 0% 100%;
 
-  --destructive: 0 84.2% 60.2%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 98%;
 
-  --input: 40 20% 85%;
-  --ring: 152 69% 19%;
-  --chart-1: 152 69% 19%;
-  --chart-2: 32 94% 44%;
+  --input: 38 30% 86%;
+  --ring: 150 70% 25%;
+  --chart-1: 150 70% 19%;
+  --chart-2: 32 96% 44%;
   --chart-3: 215 28% 17%;
-  --chart-4: 40 50% 50%;
-  --chart-5: 0 0% 50%;
+  --chart-4: 42 80% 60%;
+  --chart-5: 180 50% 35%;
 
   --app-font-sans: 'Plus Jakarta Sans', sans-serif;
   --app-font-serif: 'Playfair Display', serif;
   --app-font-mono: Menlo, monospace;
   
-  --radius: 0.5rem;
+  --radius: 0.625rem;
   
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-sm: 0 1px 3px 0 rgb(15 81 50 / 0.06);
+  --shadow: 0 2px 6px -1px rgb(15 81 50 / 0.1), 0 1px 3px -1px rgb(15 81 50 / 0.06);
+  --shadow-md: 0 4px 12px -2px rgb(15 81 50 / 0.12), 0 2px 6px -2px rgb(15 81 50 / 0.06);
+  --shadow-lg: 0 12px 24px -4px rgb(15 81 50 / 0.14), 0 6px 12px -4px rgb(15 81 50 / 0.08);
 
   --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
   --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, Edit, Trash2, Upload, Loader2, GripVertical } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function BannersTab() {
@@ -18,13 +18,12 @@ export default function BannersTab() {
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [displayOrder, setDisplayOrder] = useState('0');
   const [isActive, setIsActive] = useState(true);
 
   const { data: banners, isLoading } = useQuery({
     queryKey: ['admin_banners'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('hero_banners').select('*').order('display_order', { ascending: true });
+      const { data, error } = await supabase.from('hero_banners').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       return data;
     }
@@ -59,7 +58,6 @@ export default function BannersTab() {
     setTitle('');
     setSubtitle('');
     setImageUrl('');
-    setDisplayOrder((banners?.length || 0).toString());
     setIsActive(true);
   };
 
@@ -68,7 +66,6 @@ export default function BannersTab() {
     setTitle(banner.title || '');
     setSubtitle(banner.subtitle || '');
     setImageUrl(banner.image_url || '');
-    setDisplayOrder(banner.display_order?.toString() || '0');
     setIsActive(banner.is_active);
     setIsDialogOpen(true);
   };
@@ -81,7 +78,6 @@ export default function BannersTab() {
         title,
         subtitle,
         image_url: imageUrl,
-        display_order: parseInt(displayOrder) || 0,
         is_active: isActive
       };
 
@@ -166,17 +162,9 @@ export default function BannersTab() {
                 <Label>Subtitle (Optional)</Label>
                 <Input value={subtitle} onChange={e => setSubtitle(e.target.value)} placeholder="Smaller text below headline" />
               </div>
-              <div className="flex gap-4">
-                <div className="space-y-2 flex-1">
-                  <Label>Display Order</Label>
-                  <Input type="number" value={displayOrder} onChange={e => setDisplayOrder(e.target.value)} />
-                </div>
-                <div className="space-y-2 flex-1 flex flex-col justify-end pb-2">
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="banner-active">Active (Visible)</Label>
-                    <Switch id="banner-active" checked={isActive} onCheckedChange={setIsActive} />
-                  </div>
-                </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="banner-active">Active (Visible)</Label>
+                <Switch id="banner-active" checked={isActive} onCheckedChange={setIsActive} />
               </div>
             </div>
             <div className="flex justify-end gap-2 border-t pt-4">
@@ -196,7 +184,6 @@ export default function BannersTab() {
         ) : banners && banners.length > 0 ? (
           banners.map((banner) => (
             <div key={banner.id} className="flex items-center gap-6 p-4 rounded-xl border bg-card">
-              <GripVertical className="text-muted-foreground w-5 h-5 shrink-0" />
               <div className="w-48 aspect-[21/9] rounded overflow-hidden shrink-0 border bg-muted">
                 <img src={banner.image_url} alt="Banner" className="w-full h-full object-cover" />
               </div>
@@ -207,7 +194,6 @@ export default function BannersTab() {
                   <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${banner.is_active ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
                     {banner.is_active ? 'Active' : 'Hidden'}
                   </span>
-                  <span className="text-xs text-muted-foreground">Order: {banner.display_order}</span>
                 </div>
               </div>
               <div className="flex flex-col gap-2 shrink-0">

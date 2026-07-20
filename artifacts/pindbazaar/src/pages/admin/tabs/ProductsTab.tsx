@@ -24,7 +24,6 @@ export default function ProductsTab() {
   const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [comparePrice, setComparePrice] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [subcategoryId, setSubcategoryId] = useState('');
   const [stock, setStock] = useState('100');
@@ -50,8 +49,16 @@ export default function ProductsTab() {
     }
   });
 
-  const mainCategories = categories?.filter(c => !c.parent_id) || [];
-  const subCategories = categories?.filter(c => c.parent_id?.toString() === categoryId) || [];
+  const { data: allSubcategories } = useQuery({
+    queryKey: ['admin_subcategories'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('subcategories').select('*').order('name', { ascending: true });
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const subCategories = allSubcategories?.filter((s: any) => s.category_id?.toString() === categoryId) || [];
 
   const handleNameChange = (val: string) => {
     setName(val);
@@ -95,7 +102,6 @@ export default function ProductsTab() {
     setSlug('');
     setDescription('');
     setPrice('');
-    setComparePrice('');
     setCategoryId('');
     setSubcategoryId('');
     setStock('100');
@@ -110,7 +116,6 @@ export default function ProductsTab() {
     setSlug(product.slug || '');
     setDescription(product.description || '');
     setPrice(product.price?.toString() || '');
-    setComparePrice(product.compare_price?.toString() || '');
     setCategoryId(product.category_id?.toString() || '');
     setSubcategoryId(product.subcategory_id?.toString() || '');
     setStock(product.stock?.toString() || '0');
@@ -127,7 +132,6 @@ export default function ProductsTab() {
         slug,
         description,
         price: parseFloat(price) || 0,
-        compare_price: comparePrice ? parseFloat(comparePrice) : null,
         category_id: categoryId ? parseInt(categoryId) : null,
         subcategory_id: subcategoryId ? parseInt(subcategoryId) : null,
         stock: parseInt(stock) || 0,
@@ -203,15 +207,11 @@ export default function ProductsTab() {
                 <Input type="number" value={price} onChange={e => setPrice(e.target.value)} />
               </div>
               <div className="col-span-2 sm:col-span-1 space-y-2">
-                <Label>Compare at Price (Optional)</Label>
-                <Input type="number" value={comparePrice} onChange={e => setComparePrice(e.target.value)} />
-              </div>
-              <div className="col-span-2 sm:col-span-1 space-y-2">
                 <Label>Main Category</Label>
-                <Select value={categoryId} onValueChange={setCategoryId}>
+                <Select value={categoryId} onValueChange={v => { setCategoryId(v); setSubcategoryId(''); }}>
                   <SelectTrigger><SelectValue placeholder="Select Category" /></SelectTrigger>
                   <SelectContent>
-                    {mainCategories.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
+                    {categories?.map((c: any) => <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
