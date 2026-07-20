@@ -48,11 +48,13 @@ export const CheckoutModal = ({ isOpen, setIsOpen }: CheckoutModalProps) => {
     createOrder.mutate(
       {
         customer_name: data.fullName,
-        phone: data.phone,
-        address: data.address,
-        notes: data.notes,
+        customer_phone: data.phone,
+        // append notes to address if provided — no separate notes column in schema
+        customer_address: data.notes
+          ? `${data.address}\n\nNotes: ${data.notes}`
+          : data.address,
         items: cart,
-        total: total,
+        total_price: total,
         status: 'pending',
       },
       {
