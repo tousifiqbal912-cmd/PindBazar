@@ -1,0 +1,100 @@
+Create a modern, ultra-responsive, beautiful e-commerce web application for "PindBazaar" (pindbazaar.com) selling pure, authentic village foods (Desi Ghee, Khajur, Honey, Oils) using React + Vite, Tailwind CSS, Lucide Icons, Framer Motion (for smooth dynamic animations), and Supabase integration.
+
+### COLOR PALETTE & DESIGN SYSTEM
+- Theme: Trustworthy, earthy, premium, authentic village look.
+- Colors: Deep Emerald Green (`#0F5132`), Rich Warm Amber/Gold (`#D97706`), Warm Cream/Beige background (`#FDFBF7`), and Dark Slate text (`#1F2937`).
+- Animations: Smooth transitions, hover effects on product cards, animated cart popups, and hero image carousels.
+
+### ENV CONFIGURATION
+Create a `.env` file with:
+VITE_SUPABASE_URL=https://gbihtlvphavldypmekpv.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_Avo0dwoaFYmTc20ONn61Ew_o4Rwh_5r
+
+### SUPABASE CLIENT SETUP (`src/utils/supabase.ts`)
+```ts
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
+WEBSITE STRUCTURE & FEATURES
+HEADER & NAVIGATION:
+
+Logo: "PindBazaar" with a stylish green and gold leaf/village badge icon.
+
+Nav Links: Home, Products, About Us, Privacy Policy, Contact Us.
+
+Functional Search Bar (searches products by name).
+
+Cart Icon with a dynamic counter badge that opens a sliding Cart Drawer.
+
+WhatsApp quick chat float button using contact number from DB.
+
+HOME PAGE (/):
+
+Dynamic Animated Hero Banner Slider fetching images directly from Supabase table hero_banners. If no images exist, show a clean, elegant placeholder asking admin to upload banners in the /admin dashboard.
+
+Trust Badges: "100% Pure Village Sourced", "Cash On Delivery Nationwide", "Hand-picked Quality".
+
+Dynamic Categories & Subcategories filter tabs fetched from Supabase.
+
+Featured Products Grid with hover zoom effects, multi-image preview thumbnail indicators, and "Add to Cart" button.
+
+Customer Reviews / Testimonials section.
+
+SHOPPING CART & CASH ON DELIVERY CHECKOUT:
+
+No login or registration required for customers!
+
+Modal/Drawer for viewing cart items, adjusting quantities, and calculating total in PKR (Rs.).
+
+Simple Checkout Form: Full Name, Phone Number, Shipping Address, and Order Notes.
+
+On submit, insert the order into the orders Supabase table and trigger a success animation modal with order confirmation.
+
+STATIC & CONTACT PAGES:
+
+About Us Page: Story of bringing pure, unadulterated village goods (Desi Ghee, Dates, Oils) straight to city doorsteps.
+
+Contact Us Page: Displays dynamic email (tousifiqbal912@gmail.com) and WhatsApp (03469278682), with an interactive contact form.
+
+Privacy Policy Page: Standard customer privacy terms for e-commerce and Cash on Delivery.
+
+Footer: Dynamic social media links (Facebook, Instagram, Twitter) loaded from DB settings, along with quick links and copyright info.
+
+SECRET ADMIN DASHBOARD (/admin):
+
+Crucial Guardrail: Route /admin must display a clean Login Screen first.
+
+Login Credentials Validation:
+
+Allowed Email: tousifiqbal912@gmail.com
+
+Allowed Password: Tousif_Iqbal_baloch@912
+
+Store session locally so the admin stays logged in until clicking Logout.
+
+Admin Features Dashboard Tabs:
+
+Product Management: Add, edit, and delete products. Ability to upload up to 3 images per product directly into the Supabase storage bucket pindbazaar and store public URLs in the array field images. Assign category, subcategory, and price in PKR.
+
+Category Management: Add, edit, or delete Main Categories and Subcategories.
+
+Hero Banner Management: Upload, view, and delete homepage Hero Slider banner images (stored in Supabase pindbazaar bucket).
+
+Order Management: View all customer Cash on Delivery orders, view customer details/address, change order status (Pending, Shipped, Delivered, Cancelled).
+
+Site Settings: Edit contact email, edit WhatsApp phone number, and edit social media URLs.
+
+IMAGE UPLOAD HANDLER TO SUPABASE STORAGE:
+
+When admin uploads images (for products or hero banners), upload them directly to Supabase storage bucket named pindbazaar using supabase.storage.from('pindbazaar').upload(...) and retrieve public URLs using getPublicUrl().
+
+UX/ACCESSIBILITY & POLISH:
+
+Ensure the site is 100% mobile-responsive with a clean mobile hamburger menu.
+
+Format all currency in PKR (e.g., Rs. 2,500).
+
+Use clean loading spinners and Toast notifications for actions like "Added to cart", "Order placed successfully", "Product saved", etc.
